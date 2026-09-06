@@ -1,5 +1,3 @@
-"""The public DialogueSidon demo's Kaldi frontend, without Torchaudio."""
-
 import math
 from functools import lru_cache
 
@@ -59,8 +57,6 @@ def extract_features(waveform: mx.array) -> tuple[mx.array, mx.array]:
 def normalize_chunk(waveform: mx.array) -> mx.array:
     peak = mx.maximum(mx.max(mx.abs(waveform)), 1e-6)
     waveform = mx.pad(0.9 * waveform / peak, ((160, 160),))
-    # The reference fails on fewer than two fbank frames. Extend only these
-    # very short inputs, and trim the decoded result to the requested duration.
     if waveform.shape[0] < 560:
         waveform = mx.pad(waveform, ((0, 560 - waveform.shape[0]),))
     return waveform
@@ -81,7 +77,6 @@ def _resample_kernel(orig_freq: int, new_freq: int):
 
 
 def resample(waveform: mx.array, sample_rate: int, target_rate: int = 16000):
-    """Torchaudio's default Hann-windowed sinc resampling for mono audio."""
     if sample_rate <= 0 or target_rate <= 0:
         raise ValueError("Sample rates must be positive")
     if sample_rate == target_rate:
